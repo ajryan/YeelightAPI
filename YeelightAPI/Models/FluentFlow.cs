@@ -14,13 +14,13 @@ namespace YeelightAPI.Models
     {
         #region Private Fields
 
-        private IDeviceController _device = null;
+        private IDeviceController _device;
 
         private List<ColorFlowExpression> _expressions = new List<ColorFlowExpression>();
 
-        private Func<ColorFlow.ColorFlow, Task<bool>> _startColorFlowMethod = null;
+        private Func<ColorFlow.ColorFlow, Task<bool>> _startColorFlowMethod;
 
-        private Func<Task<bool>> _stopColorFlowMethod = null;
+        private Func<Task<bool>> _stopColorFlowMethod;
 
         #endregion Private Fields
 

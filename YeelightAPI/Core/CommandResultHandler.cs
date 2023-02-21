@@ -46,7 +46,7 @@ namespace YeelightAPI.Core
         /// </summary>
         internal CommandResultHandler()
         {
-            //automatic cancel after 5 seconds
+            // automatic cancel after 5 seconds
             _cts.Token.Register(() =>
             {
                 TrySetCanceled();

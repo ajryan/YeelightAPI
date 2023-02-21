@@ -17,14 +17,14 @@ namespace YeelightAPI.Core
         /// </summary>
         /// <param name="properties"></param>
         /// <returns></returns>
-        public static List<object> GetRealNames(this PROPERTIES properties)
+        public static List<string> GetRealNames(this PROPERTIES properties)
         {
             Array vals = Enum.GetValues(typeof(PROPERTIES));
             return vals
                 .Cast<PROPERTIES>()
                 .Where(m => properties.HasFlag(m) && m != PROPERTIES.ALL && m != PROPERTIES.NONE)
                 .Select(x => x.ToString())
-                .ToList<object>();
+                .ToList();
         }
 
         #endregion Public Methods

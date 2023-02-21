@@ -24,7 +24,7 @@ namespace YeelightAPI
         /// Constructor with one device
         /// </summary>
         /// <param name="name"></param>
-        public DeviceGroup(string name = null)
+        public DeviceGroup(string name)
         {
             Name = name;
         }
@@ -34,7 +34,7 @@ namespace YeelightAPI
         /// </summary>
         /// <param name="device"></param>
         /// <param name="name"></param>
-        public DeviceGroup(Device device, string name = null)
+        public DeviceGroup(Device device, string name)
         {
             Add(device);
             Name = name;
@@ -44,9 +44,11 @@ namespace YeelightAPI
         /// Constructor with devices as params
         /// </summary>
         /// <param name="devices"></param>
-        public DeviceGroup(params Device[] devices)
+        /// <param name="name"></param>
+        public DeviceGroup(Device[] devices, string name)
         {
             AddRange(devices);
+            Name = name;
         }
 
         /// <summary>
@@ -54,7 +56,7 @@ namespace YeelightAPI
         /// </summary>
         /// <param name="devices"></param>
         /// <param name="name"></param>
-        public DeviceGroup(IEnumerable<Device> devices, string name = null)
+        public DeviceGroup(IEnumerable<Device> devices, string name)
         {
             AddRange(devices);
             Name = name;
@@ -104,6 +106,7 @@ namespace YeelightAPI
             return result;
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             return $"{this.Name} ({this.Count} devices)";

@@ -29,11 +29,11 @@ namespace YeelightAPI
             HandlePercentValue(ref parameters, percent);
             parameters.Add(Math.Max(duration ?? 0, Constants.MinimumSmoothDuration));
 
-            CommandResult<List<string>> result = await ExecuteCommandWithResponse<List<string>>(
+            var result = await ExecuteCommandWithResponse<List<string>>(
                 method: METHODS.AdjustBright,
                 parameters: parameters);
 
-            return result.IsOk();
+            return result?.IsOk() == true;
         }
 
         /// <summary>
@@ -48,11 +48,11 @@ namespace YeelightAPI
             HandlePercentValue(ref parameters, percent);
             parameters.Add(Math.Max(duration ?? 0, Constants.MinimumSmoothDuration));
 
-            CommandResult<List<string>> result = await ExecuteCommandWithResponse<List<string>>(
+            var result = await ExecuteCommandWithResponse<List<string>>(
                 method: METHODS.AdjustColor,
                 parameters: parameters);
 
-            return result.IsOk();
+            return result?.IsOk() == true;
         }
 
         /// <summary>
@@ -67,11 +67,11 @@ namespace YeelightAPI
             HandlePercentValue(ref parameters, percent);
             parameters.Add(Math.Max(duration ?? 0, Constants.MinimumSmoothDuration));
 
-            CommandResult<List<string>> result = await ExecuteCommandWithResponse<List<string>>(
+            var result = await ExecuteCommandWithResponse<List<string>>(
                 method: METHODS.AdjustColorTemperature,
                 parameters: parameters);
 
-            return result.IsOk();
+            return result?.IsOk() == true;
         }
 
         #region Public Methods
@@ -92,12 +92,12 @@ namespace YeelightAPI
                 return false;
             }
 
-            //continuous receiving
+            // continuous receiving
 #pragma warning disable 4014
             Watch();
 #pragma warning restore 4014
 
-            //initialiazing all properties
+            // initializing all properties
             Dictionary<PROPERTIES, object> properties = await GetAllProps();
 
             if (properties != null)
@@ -122,11 +122,11 @@ namespace YeelightAPI
         {
             List<object> parameters = new List<object>() { (int)type, value };
 
-            CommandResult<List<string>> result = await ExecuteCommandWithResponse<List<string>>(
+            var result = await ExecuteCommandWithResponse<List<string>>(
                 method: METHODS.AddCron,
                 parameters: parameters);
 
-            return result.IsOk();
+            return result?.IsOk() == true;
         }
 
         /// <summary>
@@ -138,11 +138,11 @@ namespace YeelightAPI
         {
             List<object> parameters = new List<object>() { (int)type };
 
-            CommandResult<List<string>> result = await ExecuteCommandWithResponse<List<string>>(
+            var result = await ExecuteCommandWithResponse<List<string>>(
                 method: METHODS.DeleteCron,
                 parameters: parameters);
 
-            return result.IsOk();
+            return result?.IsOk() == true;
         }
 
         /// <summary>
@@ -159,7 +159,10 @@ namespace YeelightAPI
                 {
                     _watchCancellationTokenSource?.Cancel();
                 }
-                catch (ObjectDisposedException) { }
+                catch (ObjectDisposedException ex)
+                {
+                    OnError?.Invoke(this, new UnhandledExceptionEventArgs(ex, false));
+                }
             }
         }
 
@@ -182,11 +185,11 @@ namespace YeelightAPI
         {
             List<object> parameters = new List<object>() { action.ToString(), property.ToString() };
 
-            CommandResult<List<string>> result = await ExecuteCommandWithResponse<List<string>>(
+            var result = await ExecuteCommandWithResponse<List<string>>(
                 method: METHODS.SetAdjust,
                 parameters: parameters);
 
-            return result.IsOk();
+            return result?.IsOk() == true;
         }
 
         /// <summary>
@@ -201,11 +204,11 @@ namespace YeelightAPI
 
             HandleSmoothValue(ref parameters, smooth);
 
-            CommandResult<List<string>> result = await ExecuteCommandWithResponse<List<string>>(
+            var result = await ExecuteCommandWithResponse<List<string>>(
                 method: METHODS.SetBrightness,
                 parameters: parameters);
 
-            return result.IsOk();
+            return result?.IsOk() == true;
         }
 
         /// <summary>
@@ -220,11 +223,11 @@ namespace YeelightAPI
 
             HandleSmoothValue(ref parameters, smooth);
 
-            CommandResult<List<string>> result = await ExecuteCommandWithResponse<List<string>>(
+            var result = await ExecuteCommandWithResponse<List<string>>(
                 method: METHODS.SetColorTemperature,
                 parameters: parameters);
 
-            return result.IsOk();
+            return result?.IsOk() == true;
         }
 
         /// <summary>
@@ -233,9 +236,9 @@ namespace YeelightAPI
         /// <returns></returns>
         public async Task<bool> SetDefault()
         {
-            CommandResult<List<string>> result = await ExecuteCommandWithResponse<List<string>>(METHODS.SetDefault);
+            var result = await ExecuteCommandWithResponse<List<string>>(METHODS.SetDefault);
 
-            return result.IsOk();
+            return result?.IsOk() == true;
         }
 
         /// <summary>
@@ -251,11 +254,11 @@ namespace YeelightAPI
 
             HandleSmoothValue(ref parameters, smooth);
 
-            CommandResult<List<string>> result = await ExecuteCommandWithResponse<List<string>>(
+            var result = await ExecuteCommandWithResponse<List<string>>(
                 method: METHODS.SetHSVColor,
                 parameters: parameters);
 
-            return result.IsOk();
+            return result?.IsOk() == true;
         }
 
         /// <summary>
@@ -271,12 +274,12 @@ namespace YeelightAPI
             HandleSmoothValue(ref parameters, smooth);
             parameters.Add((int)mode);
 
-            CommandResult<List<string>> result = await ExecuteCommandWithResponse<List<string>>(
+            var result = await ExecuteCommandWithResponse<List<string>>(
                 method: METHODS.SetPower,
                 parameters: parameters
             );
 
-            return result.IsOk();
+            return result?.IsOk() == true;
         }
 
         /// <summary>
@@ -289,17 +292,17 @@ namespace YeelightAPI
         /// <returns></returns>
         public async Task<bool> SetRGBColor(int r, int g, int b, int? smooth = null)
         {
-            //Convert RGB into integer 0x00RRGGBB
+            // Convert RGB into integer 0x00RRGGBB
             int value = ColorHelper.ComputeRGBColor(r, g, b);
             List<object> parameters = new List<object>() { value };
 
             HandleSmoothValue(ref parameters, smooth);
 
-            CommandResult<List<string>> result = await ExecuteCommandWithResponse<List<string>>(
+            var result = await ExecuteCommandWithResponse<List<string>>(
                 method: METHODS.SetRGBColor,
                 parameters: parameters);
 
-            return result.IsOk();
+            return result?.IsOk() == true;
         }
 
         /// <summary>
@@ -311,11 +314,11 @@ namespace YeelightAPI
         {
             List<object> parameters = scene;
 
-            CommandResult<List<string>> result = await ExecuteCommandWithResponse<List<string>>(
+            var result = await ExecuteCommandWithResponse<List<string>>(
                 method: METHODS.SetScene,
                 parameters: parameters);
 
-            return result.IsOk();
+            return result?.IsOk() == true;
         }
 
         /// <summary>
@@ -327,11 +330,11 @@ namespace YeelightAPI
         {
             List<object> parameters = new List<object>() { flow.RepetitionCount * flow.Count, (int)flow.EndAction, flow.GetColorFlowExpression() };
 
-            CommandResult<List<string>> result = await ExecuteCommandWithResponse<List<string>>(
+            var result = await ExecuteCommandWithResponse<List<string>>(
                 method: METHODS.StartColorFlow,
                 parameters: parameters);
 
-            return result.IsOk();
+            return result?.IsOk() == true;
         }
 
         /// <summary>
@@ -340,9 +343,9 @@ namespace YeelightAPI
         /// <param name="hostname"></param>
         /// <param name="port"></param>
         /// <returns></returns>
-        public async Task<bool> StartMusicMode(string hostname = null, int port = 12345)
+        public async Task<bool> StartMusicMode(string? hostname = null, int port = 12345)
         {
-            //init new TCP socket
+            // init new TCP socket
             if (string.IsNullOrWhiteSpace(hostname))
             {
                 hostname = GetLocalIpAddress();
@@ -353,11 +356,11 @@ namespace YeelightAPI
 
             List<object> parameters = new List<object>() { (int)MusicAction.On, hostname, port };
 
-            CommandResult<List<string>> result = await ExecuteCommandWithResponse<List<string>>(
+            var result = await ExecuteCommandWithResponse<List<string>>(
                             method: METHODS.SetMusicMode,
                             parameters: parameters);
 
-            if (result.IsOk())
+            if (result?.IsOk() == true)
             {
                 this.IsMusicModeEnabled = true;
                 this.Disconnect();
@@ -365,7 +368,7 @@ namespace YeelightAPI
                 _tcpClient = musicTcpClient;
             }
 
-            return result.IsOk();
+            return result?.IsOk() == true;
         }
 
         /// <summary>
@@ -374,10 +377,10 @@ namespace YeelightAPI
         /// <returns></returns>
         public async Task<bool> StopColorFlow()
         {
-            CommandResult<List<string>> result = await ExecuteCommandWithResponse<List<string>>(
+            var result = await ExecuteCommandWithResponse<List<string>>(
                             method: METHODS.StopColorFlow);
 
-            return result.IsOk();
+            return result?.IsOk() == true;
         }
 
         /// <summary>
@@ -388,13 +391,13 @@ namespace YeelightAPI
         {
             List<object> parameters = new List<object>() { (int)MusicAction.Off };
 
-            CommandResult<List<string>> result = await ExecuteCommandWithResponse<List<string>>(
+            var result = await ExecuteCommandWithResponse<List<string>>(
                             method: METHODS.SetMusicMode,
                             parameters: parameters);
 
-            if (result.IsOk())
+            if (result?.IsOk() == true)
             {
-                //disables the music mode
+                // disables the music mode
                 this.IsMusicModeEnabled = false;
                 await DisableMusicModeAsync();
                 return true;
@@ -409,9 +412,9 @@ namespace YeelightAPI
         /// <returns></returns>
         public async Task<bool> Toggle()
         {
-            CommandResult<List<string>> result = await ExecuteCommandWithResponse<List<string>>(METHODS.Toggle);
+            var result = await ExecuteCommandWithResponse<List<string>>(METHODS.Toggle);
 
-            return result.IsOk();
+            return result?.IsOk() == true;
         }
 
         /// <summary>
@@ -424,11 +427,11 @@ namespace YeelightAPI
             List<object> parameters = new List<object>() { Constants.Off };
             HandleSmoothValue(ref parameters, smooth);
 
-            CommandResult<List<string>> result = await ExecuteCommandWithResponse<List<string>>(
+            var result = await ExecuteCommandWithResponse<List<string>>(
                 method: METHODS.SetPower,
                 parameters: parameters);
 
-            return result.IsOk();
+            return result?.IsOk() == true;
         }
 
         /// <summary>
@@ -443,11 +446,11 @@ namespace YeelightAPI
             HandleSmoothValue(ref parameters, smooth);
             parameters.Add((int)mode);
 
-            CommandResult<List<string>> result = await ExecuteCommandWithResponse<List<string>>(
+            var result = await ExecuteCommandWithResponse<List<string>>(
                 method: METHODS.SetPower,
                 parameters: parameters);
 
-            return result.IsOk();
+            return result?.IsOk() == true;
         }
 
         #endregion Public Methods

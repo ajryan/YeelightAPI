@@ -20,11 +20,6 @@ namespace YeelightAPI
         #region Public Constructors
 
         /// <summary>
-        /// Constructor
-        /// </summary>
-        public NotificationReceivedEventArgs() { }
-
-        /// <summary>
         /// Constructor with notification result
         /// </summary>
         /// <param name="result"></param>

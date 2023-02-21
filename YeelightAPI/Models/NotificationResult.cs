@@ -14,13 +14,13 @@ namespace YeelightAPI.Models
         /// <summary>
         /// Method
         /// </summary>
-        public string Method { get; set; }
+        public string Method { get; set; } = null!;
 
         /// <summary>
         /// Parameters
         /// </summary>
         [JsonConverter(typeof(PropertiesDictionaryConverter))]
-        public Dictionary<PROPERTIES, object> Params { get; set; }
+        public Dictionary<PROPERTIES, object> Params { get; set; } = new();
 
         #endregion Public Properties
     }

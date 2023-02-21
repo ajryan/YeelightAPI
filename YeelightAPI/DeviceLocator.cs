@@ -8,7 +8,6 @@ using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -36,10 +35,10 @@ namespace YeelightAPI
           "M-SEARCH * HTTP/1.1\r\nHOST: {0}:1982\r\nMAN: \"ssdp:discover\"\r\nST: wifi_bulb";
 
         private const int RetryDelayInMilliseconds = 10;
-        private static readonly List<object> _allPropertyRealNames = PROPERTIES.ALL.GetRealNames();
+        private static readonly List<object> _allPropertyRealNames = PROPERTIES.ALL.GetRealNames().Cast<object>().ToList();
         private static readonly char[] _colon = { ':' };
         private static readonly string _defaultMulticastIPAddress = "239.255.255.250";
-        private static readonly string _yeelightlocationMatch = "Location: yeelight://";
+        private static readonly string _yeelightLocationMatch = "Location: yeelight://";
 
         #endregion Private Fields
 
@@ -92,7 +91,7 @@ namespace YeelightAPI
         ///   they are available.
         /// </param>
         /// <returns>A <see cref="Task" /> that contains a collection of all discovered <see cref="Device" /> instances.</returns>
-        public static async Task<IEnumerable<Device>> DiscoverAsync(IProgress<Device> deviceFoundReporter) =>
+        public static async Task<IEnumerable<Device>> DiscoverAsync(IProgress<Device>? deviceFoundReporter) =>
           await DeviceLocator.DiscoverAsync(deviceFoundReporter, CancellationToken.None);
 
         /// <summary>
@@ -106,7 +105,7 @@ namespace YeelightAPI
         /// <returns>A <see cref="Task" /> that contains a collection of all discovered <see cref="Device" /> instances.</returns>
         /// <exception cref="OperationCanceledException">Thrown when operation was cancelled by the caller.</exception>
         public static async Task<IEnumerable<Device>> DiscoverAsync(
-          IProgress<Device> deviceFoundReporter,
+          IProgress<Device>? deviceFoundReporter,
           CancellationToken cancellationToken)
         {
             IEnumerable<Task<DiscoveryResult>> tasks = NetworkInterface.GetAllNetworkInterfaces()
@@ -116,7 +115,7 @@ namespace YeelightAPI
 
             DiscoveryResult[] results = await Task.WhenAll(tasks);
 
-            //no results and exceptions has occured
+            // no results and exceptions has occurred
             if (results.All(result => !result.HasResult && result.HasError))
             {
                 throw new DeviceDiscoveryException("An error occurred during accessing a network socket. See the exception's property 'SocketExceptions' for more details.", results.SelectMany(result => result.Exceptions.SelectMany(e => e.SocketExceptions)));
@@ -125,7 +124,8 @@ namespace YeelightAPI
             return results
               .SelectMany(d => d.Devices)
               .GroupBy(d => d.Hostname)
-              .Select(g => g.FirstOrDefault());
+              .Select(g => g.FirstOrDefault())
+              .Where(g => g != null)!;
         }
 
         /// <summary>
@@ -175,7 +175,7 @@ namespace YeelightAPI
         /// <exception cref="OperationCanceledException">Thrown when operation was cancelled by the caller.</exception>
         public static async Task<IEnumerable<Device>> DiscoverAsync(
           NetworkInterface networkInterface,
-          IProgress<Device> deviceFoundReporter,
+          IProgress<Device>? deviceFoundReporter,
           CancellationToken cancellationToken) =>
           (await DeviceLocator.SearchNetworkForDevicesAsync(networkInterface, deviceFoundReporter, cancellationToken)).Devices;
 
@@ -450,13 +450,13 @@ namespace YeelightAPI
         {
             if (DeviceLocator.UseAllAvailableMulticastAddresses)
             {
-                //return all available multicast addresses
+                // return all available multicast addresses
                 return networkInterface.GetIPProperties()
                     .MulticastAddresses.Where(m => m.Address.AddressFamily == AddressFamily.InterNetwork)
                     .Select(address => address.Address);
             }
 
-            //return default multicast address only
+            // return default multicast address only
             return new[]
             {
                 IPAddress.Parse(DefaultMulticastIPAddress)
@@ -472,7 +472,7 @@ namespace YeelightAPI
         /// <returns></returns>
         private static async Task<DiscoveryResult> SearchNetworkForDevicesAsync(
           NetworkInterface netInterface,
-          IProgress<Device> deviceFoundCallback,
+          IProgress<Device>? deviceFoundCallback,
           CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -524,7 +524,7 @@ namespace YeelightAPI
         private static IEnumerable<Device> CheckSocketForDevices(
           IEnumerable<IPAddress> multicastIPAddresses,
           UnicastIPAddressInformation ip,
-          IProgress<Device> deviceFoundCallback,
+          IProgress<Device>? deviceFoundCallback,
           CancellationToken cancellationToken)
         {
             var socketExceptions = new List<SocketException>();
@@ -578,7 +578,6 @@ namespace YeelightAPI
         {
             ssdpSocket.Blocking = false;
             ssdpSocket.Ttl = 1;
-            ssdpSocket.UseOnlyOverlappedIO = true;
             ssdpSocket.MulticastLoopback = false;
             ssdpSocket.Bind(new IPEndPoint(ip.Address, 0));
             ssdpSocket.SetSocketOption(
@@ -589,7 +588,7 @@ namespace YeelightAPI
 
         private static ICollection<Device> GetDevicesFromSocket(
           IPEndPoint multicastIPEndpoint,
-          IProgress<Device> deviceFoundCallback,
+          IProgress<Device>? deviceFoundCallback,
           Socket ssdpSocket,
           List<SocketException> socketExceptions,
           CancellationToken cancellationToken)
@@ -627,9 +626,9 @@ namespace YeelightAPI
                                 string response = Encoding.UTF8.GetString(buffer.Take(numberOfBytesRead).ToArray());
                                 cancellationToken.ThrowIfCancellationRequested();
 
-                                Device device = DeviceLocator.GetDeviceInformationFromSsdpMessage(response);
+                                Device? device = DeviceLocator.GetDeviceInformationFromSsdpMessage(response);
 
-                                if (!devices.ContainsKey(device.Hostname))
+                                if (device != null && !devices.ContainsKey(device.Hostname))
                                 {
                                     devices.Add(device.Hostname, device);
                                     deviceFoundCallback?.Report(device);
@@ -660,23 +659,23 @@ namespace YeelightAPI
         /// </summary>
         /// <param name="ssdpMessage"></param>
         /// <returns></returns>
-        private static Device GetDeviceInformationFromSsdpMessage(string ssdpMessage)
+        private static Device? GetDeviceInformationFromSsdpMessage(string ssdpMessage)
         {
             if (ssdpMessage != null)
             {
                 string[] split = ssdpMessage.Split(new[] { Constants.LineSeparator }, StringSplitOptions.RemoveEmptyEntries);
-                string host = null;
+                string? host = null;
                 int port = Constants.DefaultPort;
                 var properties = new Dictionary<string, object>();
                 var supportedMethods = new List<METHODS>();
-                string id = null, firmwareVersion = null;
+                string? id = null, firmwareVersion = null;
                 MODEL model = default;
 
                 foreach (string part in split)
                 {
-                    if (part.StartsWith(DeviceLocator._yeelightlocationMatch))
+                    if (part.StartsWith(DeviceLocator._yeelightLocationMatch))
                     {
-                        string url = part.Substring(DeviceLocator._yeelightlocationMatch.Length);
+                        string url = part.Substring(DeviceLocator._yeelightLocationMatch.Length);
                         string[] hostnameParts = url.Split(DeviceLocator._colon, StringSplitOptions.RemoveEmptyEntries);
                         if (hostnameParts.Length >= 1)
                         {
@@ -731,7 +730,10 @@ namespace YeelightAPI
                     }
                 }
 
-                return new Device(host, port, id, model, firmwareVersion, properties, supportedMethods);
+                if (host != null && id != null && firmwareVersion != null)
+                {
+                    return new Device(host, port, id, model, firmwareVersion, properties, supportedMethods);
+                }
             }
 
             return null;

@@ -3,7 +3,7 @@
 namespace YeelightAPI.Models
 {
     /// <summary>
-    /// Available Methodss
+    /// Available Methods
     /// </summary>
     public enum METHODS
     {

@@ -36,12 +36,12 @@ namespace YeelightAPI
         /// <summary>
         /// TCP client used to communicate with the device
         /// </summary>
-        private TcpClient _tcpClient;
+        private TcpClient? _tcpClient;
 
         /// <summary>
         /// Cancellation token source for the Watch task
         /// </summary>
-        private CancellationTokenSource _watchCancellationTokenSource;
+        private CancellationTokenSource? _watchCancellationTokenSource;
 
         #endregion PRIVATE ATTRIBUTES
 
@@ -50,12 +50,12 @@ namespace YeelightAPI
         /// <summary>
         /// Notification Received event
         /// </summary>
-        public event ErrorEventHandler OnError;
+        public event ErrorEventHandler? OnError;
 
         /// <summary>
         /// Notification Received event
         /// </summary>
-        public event NotificationReceivedEventHandler OnNotificationReceived;
+        public event NotificationReceivedEventHandler? OnNotificationReceived;
 
         /// <summary>
         /// Notification Received event handler
@@ -83,7 +83,7 @@ namespace YeelightAPI
         /// <summary>
         /// The ID.
         /// </summary>
-        public string Id { get; }
+        public string? Id { get; }
 
         /// <summary>
         /// Gets a value indicating if the connection to Device is established
@@ -126,7 +126,7 @@ namespace YeelightAPI
             Hostname = hostname;
             Port = port;
 
-            //autoconnect device if specified
+            // auto-connect device if specified
             if (autoConnect)
             {
                 Connect().Wait();
@@ -151,7 +151,7 @@ namespace YeelightAPI
         /// <summary>
         /// Firmware version
         /// </summary>
-        public readonly string FirmwareVersion = null;
+        public readonly string? FirmwareVersion = null;
 
         /// <summary>
         /// List of device properties
@@ -170,7 +170,7 @@ namespace YeelightAPI
         {
             get
             {
-                return this[PROPERTIES.name] as string;
+                return this[PROPERTIES.name] as string ?? "<unknown>";
             }
             set
             {
@@ -183,7 +183,7 @@ namespace YeelightAPI
         /// </summary>
         /// <param name="property"></param>
         /// <returns></returns>
-        public object this[PROPERTIES property]
+        public object? this[PROPERTIES property]
         {
             get
             {
@@ -200,26 +200,15 @@ namespace YeelightAPI
         /// </summary>
         /// <param name="propertyName"></param>
         /// <returns></returns>
-        public object this[string propertyName]
+        public object? this[string propertyName]
         {
             get
             {
-                if (Properties.ContainsKey(propertyName))
-                {
-                    return Properties[propertyName];
-                }
-                return null;
+                return Properties.TryGetValue(propertyName, out var val) ? val : null;
             }
             set
             {
-                if (Properties.ContainsKey(propertyName))
-                {
-                    Properties[propertyName] = value;
-                }
-                else if (!string.IsNullOrWhiteSpace(propertyName))
-                {
-                    Properties.Add(propertyName, value);
-                }
+                Properties[propertyName] = value ?? throw new ArgumentNullException(nameof(value));
             }
         }
 
@@ -232,7 +221,7 @@ namespace YeelightAPI
         /// </summary>
         /// <param name="method"></param>
         /// <param name="parameters"></param>
-        public void ExecuteCommand(METHODS method, List<object> parameters = null)
+        public void ExecuteCommand(METHODS method, List<object>? parameters = null)
         {
             ExecuteCommand(method, GetUniqueIdForCommand(), parameters);
         }
@@ -245,18 +234,18 @@ namespace YeelightAPI
         /// <param name="method"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public async Task<CommandResult<T>> ExecuteCommandWithResponse<T>(METHODS method, List<object> parameters = null)
+        public Task<CommandResult<T>?> ExecuteCommandWithResponse<T>(METHODS method, List<object>? parameters = null)
         {
             if (IsMusicModeEnabled)
             {
-                //music mode enabled, there will be no response, we should assume everything works
+                // music mode enabled, there will be no response, we should assume everything works
                 int uniqueId = GetUniqueIdForCommand();
                 ExecuteCommand(method, uniqueId, parameters);
-                return new CommandResult<T>() { Id = uniqueId, Error = null, IsMusicResponse = true };
+                return Task.FromResult((CommandResult<T>?)(new CommandResult<T>() { Id = uniqueId, Error = null, IsMusicResponse = true }));
             }
 
-            //default behavior : send command and wait for response
-            return await ExecuteCommandWithResponse<T>(method, GetUniqueIdForCommand(), parameters);
+            // default behavior : send command and wait for response
+            return ExecuteCommandWithResponse<T>(method, GetUniqueIdForCommand(), parameters);
         }
 
 
@@ -279,8 +268,13 @@ namespace YeelightAPI
         /// <param name="method"></param>
         /// <param name="id"></param>
         /// <param name="parameters"></param>
-        internal void ExecuteCommand(METHODS method, int id, List<object> parameters = null)
+        internal void ExecuteCommand(METHODS method, int id, List<object>? parameters = null)
         {
+            if (_tcpClient == null)
+            {
+                throw new InvalidOperationException("Not connected.");
+            }
+
             if (!IsMethodSupported(method))
             {
                 throw new InvalidOperationException($"The operation {method.GetRealName()} is not allowed by the device");
@@ -289,7 +283,7 @@ namespace YeelightAPI
             Command command = new Command()
             {
                 Id = id,
-                Method = method.GetRealName(),
+                Method = method.GetRealName() ?? throw new ApplicationException("METHODS enum missing RealName attribute"),
                 Params = parameters ?? new List<object>()
             };
 
@@ -310,7 +304,7 @@ namespace YeelightAPI
         /// <param name="id"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        internal async Task<CommandResult<T>> ExecuteCommandWithResponse<T>(METHODS method, int id, List<object> parameters = null)
+        internal async Task<CommandResult<T>?> ExecuteCommandWithResponse<T>(METHODS method, int id, List<object>? parameters = null)
         {
             try
             {
@@ -337,7 +331,7 @@ namespace YeelightAPI
             using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0))
             {
                 socket.Connect("8.8.8.8", 65530);
-                IPEndPoint endPoint = socket.LocalEndPoint as IPEndPoint;
+                IPEndPoint endPoint = socket.LocalEndPoint as IPEndPoint ?? throw new ApplicationException("Cannot determine local endpoint");
                 return endPoint.Address.ToString();
             }
         }
@@ -397,27 +391,27 @@ namespace YeelightAPI
         {
             if (SupportedOperations?.Count != 0)
             {
-                return SupportedOperations.Contains(method);
+                return SupportedOperations!.Contains(method);
             }
 
             return true;
-            //no supported operations, so we can't check if the operation is permitted
+            // no supported operations, so we can't check if the operation is permitted
         }
 
         /// <summary>
-        /// Execute a command and waits for a response (Unsafe because of Task Cancelation)
+        /// Execute a command and waits for a response (Unsafe because of Task Cancellation)
         /// </summary>
         /// <param name="method"></param>
         /// <param name="id"></param>
         /// <param name="parameters"></param>
         /// <exception cref="TaskCanceledException"></exception>
         /// <returns></returns>
-        private async Task<CommandResult<T>> UnsafeExecuteCommandWithResponse<T>(METHODS method, int id = 0, List<object> parameters = null)
+        private async Task<CommandResult<T>> UnsafeExecuteCommandWithResponse<T>(METHODS method, int id = 0, List<object>? parameters = null)
         {
             CommandResultHandler<T> commandResultHandler;
             lock (_currentCommandResults)
             {
-                if (_currentCommandResults.TryGetValue(id, out ICommandResultHandler oldHandler))
+                if (_currentCommandResults.TryGetValue(id, out var oldHandler))
                 {
                     oldHandler.TrySetCanceled();
                     _currentCommandResults.Remove(id);
@@ -437,7 +431,7 @@ namespace YeelightAPI
                 lock (_currentCommandResults)
                 {
                     // remove the command if its the current handler in the dictionary
-                    if (_currentCommandResults.TryGetValue(id, out ICommandResultHandler currentHandler))
+                    if (_currentCommandResults.TryGetValue(id, out var currentHandler))
                     {
                         if (commandResultHandler == currentHandler)
                             _currentCommandResults.Remove(id);
@@ -456,14 +450,14 @@ namespace YeelightAPI
             {
                 await Task.Run(async () =>
                 {
-                    //while device is connected
+                    // while device is connected
                     while (_tcpClient != null && _watchCancellationTokenSource.IsCancellationRequested == false)
                     {
                         lock (_syncLock)
                         {
                             if (_tcpClient != null)
                             {
-                                //automatic re-connection
+                                // automatic re-connection
                                 if (!_tcpClient.IsConnected())
                                 {
                                     _tcpClient.ConnectAsync(Hostname, Port).Wait();
@@ -471,38 +465,41 @@ namespace YeelightAPI
 
                                 if (_tcpClient.IsConnected())
                                 {
-                                    //there is data avaiblable in the pipe
+                                    // there is data available in the pipe
                                     if (_tcpClient.Client.Available > 0)
                                     {
                                         byte[] bytes = new byte[_tcpClient.Client.Available];
 
-                                        //read datas
+                                        // read data
                                         _tcpClient.Client.Receive(bytes);
 
                                         try
                                         {
-                                            string datas = Encoding.UTF8.GetString(bytes);
-                                            if (!string.IsNullOrEmpty(datas))
+                                            string data = Encoding.UTF8.GetString(bytes);
+                                            if (!string.IsNullOrEmpty(data))
                                             {
-                                                //get every messages in the pipe
-                                                foreach (string entry in datas.Split(new string[] { Constants.LineSeparator },
+                                                // get every messages in the pipe
+                                                foreach (string entry in data.Split(new string[] { Constants.LineSeparator },
                                                         StringSplitOptions.RemoveEmptyEntries))
                                                 {
-                                                    CommandResult commandResult =
+                                                    var commandResult =
                                                         JsonConvert.DeserializeObject<CommandResult>(entry, Constants.DeviceSerializerSettings);
-                                                    if (commandResult != null && commandResult.Id != 0)
+                                                    if (commandResult?.Id != 0)
                                                     {
-                                                        ICommandResultHandler commandResultHandler;
+                                                        ICommandResultHandler? commandResultHandler;
                                                         lock (_currentCommandResults)
                                                         {
-                                                            if (!_currentCommandResults.TryGetValue(commandResult.Id, out commandResultHandler))
+                                                            if (!_currentCommandResults.TryGetValue(commandResult!.Id, out commandResultHandler))
                                                                 continue; // ignore if the result can't be found
                                                         }
 
                                                         if (commandResult.Error == null)
                                                         {
-                                                            commandResult = (CommandResult)JsonConvert.DeserializeObject(entry, commandResultHandler.ResultType, Constants.DeviceSerializerSettings);
-                                                            commandResultHandler.SetResult(commandResult);
+                                                            commandResult = (CommandResult?)JsonConvert.DeserializeObject(entry, commandResultHandler.ResultType, Constants.DeviceSerializerSettings);
+                                                            if (commandResult != null)
+                                                            {
+                                                                commandResultHandler.SetResult(commandResult);
+                                                            }
                                                         }
                                                         else
                                                         {
@@ -511,7 +508,7 @@ namespace YeelightAPI
                                                     }
                                                     else
                                                     {
-                                                        NotificationResult notificationResult =
+                                                        var notificationResult =
                                                             JsonConvert.DeserializeObject<NotificationResult>(entry,
                                                                 Constants.DeviceSerializerSettings);
 
@@ -519,7 +516,7 @@ namespace YeelightAPI
                                                         {
                                                             if (notificationResult.Params != null)
                                                             {
-                                                                //save properties
+                                                                // save properties
                                                                 foreach (KeyValuePair<PROPERTIES, object> property in
                                                                         notificationResult.Params)
                                                                 {
@@ -527,7 +524,7 @@ namespace YeelightAPI
                                                                 }
                                                             }
 
-                                                            //notification result
+                                                            // notification result
                                                             OnNotificationReceived?.Invoke(this,
                                                                     new NotificationReceivedEventArgs(notificationResult));
                                                         }

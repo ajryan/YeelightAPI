@@ -20,11 +20,11 @@ namespace YeelightAPI
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        public async Task<CronResult> CronGet(CronType type = CronType.PowerOff)
+        public async Task<CronResult?> CronGet(CronType type = CronType.PowerOff)
         {
             List<object> parameters = new List<object>() { (int)type };
 
-            CommandResult<CronResult[]> result = await ExecuteCommandWithResponse<CronResult[]>(
+            var result = await ExecuteCommandWithResponse<CronResult[]>(
                             method: METHODS.GetCron,
                             parameters: parameters);
 
@@ -35,11 +35,9 @@ namespace YeelightAPI
         /// Get all the properties asynchronously
         /// </summary>
         /// <returns></returns>
-        public async Task<Dictionary<PROPERTIES, object>> GetAllProps()
+        public Task<Dictionary<PROPERTIES, object>> GetAllProps()
         {
-            Dictionary<PROPERTIES, object> result = await GetProps(PROPERTIES.ALL);
-
-            return result;
+            return GetProps(PROPERTIES.ALL);
         }
 
         /// <summary>
@@ -47,11 +45,11 @@ namespace YeelightAPI
         /// </summary>
         /// <param name="prop"></param>
         /// <returns></returns>
-        public async Task<object> GetProp(PROPERTIES prop)
+        public async Task<object?> GetProp(PROPERTIES prop)
         {
-            CommandResult<List<string>> result = await ExecuteCommandWithResponse<List<string>>(
+            var result = await ExecuteCommandWithResponse<List<string>>(
                 method: METHODS.GetProp,
-                parameters: new List<object>() { prop.ToString() } );
+                parameters: new List<object>() { prop.ToString() });
 
             return result?.Result?.Count == 1 ? result.Result[0] : null;
         }
@@ -63,48 +61,57 @@ namespace YeelightAPI
         /// <returns></returns>
         public async Task<Dictionary<PROPERTIES, object>> GetProps(PROPERTIES props)
         {
-            List<object> names = props.GetRealNames();
-            List<string> results = new List<string>();
+            List<string> names = props.GetRealNames();
+            List<string> response = new List<string>();
             if (names.Count <= 20)
             {
-                CommandResult<List<string>> commandResult = await ExecuteCommandWithResponse<List<string>>(
+                var commandResult = await ExecuteCommandWithResponse<List<string>>(
                     method: METHODS.GetProp,
-                    parameters: names
-                    );
+                    parameters: names.Select(n => (object)n).ToList());
 
-                results.AddRange(commandResult?.Result);
+                if (commandResult == null)
+                {
+                    throw new ApplicationException("Empty comment result from GetProp");
+                }
+                response.AddRange(commandResult.Result);
             }
             else
             {
 
-                CommandResult<List<string>> commandResult1 = await ExecuteCommandWithResponse<List<string>>(
+                var commandResult1 = await ExecuteCommandWithResponse<List<string>>(
                     method: METHODS.GetProp,
-                    parameters: names.Take(20).ToList() );
-                CommandResult<List<string>> commandResult2 = await ExecuteCommandWithResponse<List<string>>(
+                    parameters: names.Take(20).Select(n => (object)n).ToList());
+                var commandResult2 = await ExecuteCommandWithResponse<List<string>>(
                     method: METHODS.GetProp,
-                    parameters: names.Skip(20).ToList());
+                    parameters: names.Skip(20).Select(n => (object)n).ToList());
 
-                results.AddRange(commandResult1?.Result);
-                results.AddRange(commandResult2?.Result);
-            }
-
-            if (results.Count > 0)
-            {
-                Dictionary<PROPERTIES, object> result = new Dictionary<PROPERTIES, object>();
-
-                for (int n = 0; n < names.Count; n++)
+                if (commandResult1 == null || commandResult2 == null)
                 {
-                    string name = names[n].ToString();
-
-                    if (Enum.TryParse<PROPERTIES>(name, out PROPERTIES p))
-                    {
-                        result.Add(p, results[n]);
-                    }
+                    throw new ApplicationException("Empty comment result from GetProp");
                 }
+                response.AddRange(commandResult1.Result);
+                response.AddRange(commandResult2.Result);
 
-                return result;
             }
-            return null;
+
+            if (response.Count != names.Count)
+            {
+                throw new ApplicationException("Got different GetProp count versus requested names.");
+            }
+
+            var result = new Dictionary<PROPERTIES, object>();
+
+            for (int n = 0; n < names.Count; n++)
+            {
+                string? name = names[n].ToString();
+
+                if (name != null && Enum.TryParse<PROPERTIES>(name, out PROPERTIES p))
+                {
+                    result.Add(p, response[n]);
+                }
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -116,11 +123,11 @@ namespace YeelightAPI
         {
             List<object> parameters = new List<object>() { name };
 
-            CommandResult<List<string>> result = await ExecuteCommandWithResponse<List<string>>(
+            var result = await ExecuteCommandWithResponse<List<string>>(
                             method: METHODS.SetName,
                             parameters: parameters);
 
-            if (result.IsOk())
+            if (result?.IsOk() == true)
             {
                 Name = name;
                 return true;

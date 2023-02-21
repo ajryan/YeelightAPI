@@ -17,7 +17,7 @@ namespace YeelightAPI
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        Task<CronResult> CronGet(CronType type = CronType.PowerOff);
+        Task<CronResult?> CronGet(CronType type = CronType.PowerOff);
 
         /// <summary>
         /// Get all properties values
@@ -30,7 +30,7 @@ namespace YeelightAPI
         /// </summary>
         /// <param name="prop"></param>
         /// <returns></returns>
-        Task<object> GetProp(PROPERTIES prop);
+        Task<object?> GetProp(PROPERTIES prop);
 
         /// <summary>
         /// Get multiple properties values

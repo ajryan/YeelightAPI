@@ -19,11 +19,11 @@ namespace YeelightAPI.Core
         #region Public Methods
 
         /// <summary>
-        /// Retreive the RealNameAttribute of an enum value
+        /// Retrieve the RealNameAttribute of an enum value
         /// </summary>
         /// <param name="enumValue"></param>
         /// <returns></returns>
-        public static string GetRealName(this Enum enumValue)
+        public static string? GetRealName(this Enum enumValue)
         {
             if (_realNames.ContainsKey(enumValue))
             {
@@ -31,21 +31,25 @@ namespace YeelightAPI.Core
                 return _realNames[enumValue];
             }
 
-            //read the attribute
-            RealNameAttribute attribute;
-            MemberInfo memberInfo = enumValue.GetType().GetMember(enumValue.ToString()).FirstOrDefault();
+            // read the attribute
+            RealNameAttribute? attribute;
+            MemberInfo? memberInfo = enumValue.GetType().GetMember(enumValue.ToString()).FirstOrDefault();
 
-            if (memberInfo != null)
+            if (memberInfo == null)
             {
-                attribute = (RealNameAttribute)memberInfo.GetCustomAttributes(typeof(RealNameAttribute), false).FirstOrDefault();
-
-                //adding to cache
-                _realNames.TryAdd(enumValue, attribute.PropertyName);
-
-                return attribute.PropertyName;
+                return null;
             }
 
-            return null;
+            attribute = memberInfo.GetCustomAttributes(typeof(RealNameAttribute), false).FirstOrDefault() as RealNameAttribute;
+            if (attribute == null)
+            {
+                return null;
+            }
+
+            // adding to cache
+            _realNames.TryAdd(enumValue, attribute.PropertyName);
+
+            return attribute.PropertyName;
         }
 
         /// <summary>
@@ -63,10 +67,10 @@ namespace YeelightAPI.Core
 
             foreach (FieldInfo fieldInfo in typeof(TEnum).GetFields())
             {
-                RealNameAttribute attribute = fieldInfo.GetCustomAttribute<RealNameAttribute>();
+                RealNameAttribute? attribute = fieldInfo.GetCustomAttribute<RealNameAttribute>();
                 if (attribute?.PropertyName == realName)
                 {
-                    result = (TEnum)fieldInfo.GetValue(null);
+                    result = fieldInfo.GetValue(null) as TEnum? ?? default(TEnum);
                     return true;
                 }
             }

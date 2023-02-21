@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks> netstandard2.0; netstandard2.1; net45; net46; net47; net48; net5.0</TargetFrameworks>
+    <TargetFramework>net7.0</TargetFramework>
     <Authors>Romain ODDONE</Authors>
     <Company>Romain ODDONE</Company>
     <Version>1.10.2</Version>
@@ -19,6 +19,7 @@
     <FileVersion>1.10.2.0</FileVersion>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageIcon>icon.png</PackageIcon>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>

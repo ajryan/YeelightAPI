@@ -35,7 +35,7 @@ namespace YeelightAPI.Models
         /// <summary>
         /// Error, null if command is successful
         /// </summary>
-        public CommandErrorResult Error { get; set; }
+        public CommandErrorResult? Error { get; set; }
 
         /// <summary>
         /// Request Id (mirrored from the sent request)
@@ -67,7 +67,7 @@ namespace YeelightAPI.Models
             /// <summary>
             /// Error message
             /// </summary>
-            public string Message { get; set; }
+            public string Message { get; set; } = null!;
 
             #endregion Public Properties
 
@@ -98,7 +98,7 @@ namespace YeelightAPI.Models
         /// <summary>
         /// Result
         /// </summary>
-        public T Result { get; set; }
+        public T Result { get; set; } = default(T)!;
 
         #endregion Public Properties
     }

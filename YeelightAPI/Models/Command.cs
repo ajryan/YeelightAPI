@@ -17,12 +17,12 @@ namespace YeelightAPI.Models
         /// <summary>
         /// Method to call
         /// </summary>
-        public string Method { get; set; }
+        public string Method { get; set; } = null!;
 
         /// <summary>
         /// Parameters
         /// </summary>
-        public IList<object> Params { get; set; }
+        public IList<object> Params { get; set; } = new List<object>();
 
         #endregion Public Properties
     }

@@ -53,11 +53,11 @@ namespace YeelightAPIConsoleTest
 
                             bool success = true;
 
-                            //without smooth value (sudden)
+                          // without smooth value (sudden)
                             WriteLineWithColor("Processing tests", ConsoleColor.Cyan);
                             success &= await ExecuteTests(group, null);
 
-                            //with smooth value
+                          // with smooth value
                             WriteLineWithColor("Processing tests with smooth effect", ConsoleColor.Cyan);
                             success &= await ExecuteTests(group, 1000);
 
@@ -100,11 +100,11 @@ namespace YeelightAPIConsoleTest
                         device.OnNotificationReceived += Device_OnNotificationReceived;
                         device.OnError += Device_OnError;
 
-                        //without smooth value (sudden)
+                      // without smooth value (sudden)
                         WriteLineWithColor("Processing tests", ConsoleColor.Cyan);
                         success &= await ExecuteTests(device, null);
 
-                        //with smooth value
+                      // with smooth value
                         WriteLineWithColor("Processing tests with smooth effect", ConsoleColor.Cyan);
                         success &= await ExecuteTests(device, 1000);
 

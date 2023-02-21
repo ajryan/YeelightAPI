@@ -27,7 +27,7 @@ namespace YeelightAPI.UnitTests
         {
             int expectedDevicesCount = GetConfig<int>("discovery_devices_expected");
             int count = 0;
-            await foreach(Device device in DeviceLocator.EnumerateDevicesAsync())
+            await foreach (Device device in DeviceLocator.EnumerateDevicesAsync())
             {
                 ++count;
             }
@@ -68,7 +68,7 @@ namespace YeelightAPI.UnitTests
                   _ = (await DeviceLocator.DiscoverAsync()).ToList();
               });
 
-            //reset to default to ensure next tests don't crash
+          // reset to default to ensure next tests don't crash
             DeviceLocator.DefaultMulticastIPAddress = initialMulticastAddress;
         }
 
@@ -103,7 +103,7 @@ namespace YeelightAPI.UnitTests
 
             TypeConverter converter = TypeDescriptor.GetConverter(t);
             try
-            //if (value != null && converter.CanConvertTo(t) && converter.CanConvertFrom(typeof(string)))
+          // if (value != null && converter.CanConvertTo(t) && converter.CanConvertFrom(typeof(string)))
             {
                 return (T)converter.ConvertFromString(value);
             }

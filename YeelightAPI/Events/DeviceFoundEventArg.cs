@@ -21,11 +21,6 @@ namespace YeelightAPI.Events
         #region Public Constructors
 
         /// <summary>
-        /// Constructor
-        /// </summary>
-        public DeviceFoundEventArgs() { }
-
-        /// <summary>
         /// Constructor with notification result
         /// </summary>
         /// <param name="device"></param>

@@ -19,9 +19,9 @@ namespace YeelightAPI
         /// <param name="percent"></param>
         /// <param name="smooth"></param>
         /// <returns></returns>
-        public async Task<bool> BackgroundAdjustBright(int percent, int? smooth = null)
+        public Task<bool> BackgroundAdjustBright(int percent, int? smooth = null)
         {
-            return await Process((Device device) =>
+            return Process((Device device) =>
             {
                 return device.BackgroundAdjustBright(percent, smooth);
             });
@@ -33,9 +33,9 @@ namespace YeelightAPI
         /// <param name="percent"></param>
         /// <param name="smooth"></param>
         /// <returns></returns>
-        public async Task<bool> BackgroundAdjustColor(int percent, int? smooth = null)
+        public Task<bool> BackgroundAdjustColor(int percent, int? smooth = null)
         {
-            return await Process((Device device) =>
+            return Process((Device device) =>
             {
                 return device.BackgroundAdjustColor(percent, smooth);
             });
@@ -47,9 +47,9 @@ namespace YeelightAPI
         /// <param name="percent"></param>
         /// <param name="smooth"></param>
         /// <returns></returns>
-        public async Task<bool> BackgroundAdjustColorTemperature(int percent, int? smooth = null)
+        public Task<bool> BackgroundAdjustColorTemperature(int percent, int? smooth = null)
         {
-            return await Process((Device device) =>
+            return Process((Device device) =>
             {
                 return device.BackgroundAdjustColorTemperature(percent, smooth);
             });
@@ -70,9 +70,9 @@ namespace YeelightAPI
         /// <param name="action"></param>
         /// <param name="property"></param>
         /// <returns></returns>
-        public async Task<bool> BackgroundSetAdjust(AdjustAction action, AdjustProperty property)
+        public Task<bool> BackgroundSetAdjust(AdjustAction action, AdjustProperty property)
         {
-            return await Process((Device device) =>
+            return Process((Device device) =>
             {
                 return device.BackgroundSetAdjust(action, property);
             });
@@ -84,9 +84,9 @@ namespace YeelightAPI
         /// <param name="value"></param>
         /// <param name="smooth"></param>
         /// <returns></returns>
-        public async Task<bool> BackgroundSetBrightness(int value, int? smooth = null)
+        public Task<bool> BackgroundSetBrightness(int value, int? smooth = null)
         {
-            return await Process((Device device) =>
+            return Process((Device device) =>
             {
                 return device.BackgroundSetBrightness(value, smooth);
             });
@@ -98,9 +98,9 @@ namespace YeelightAPI
         /// <param name="temperature"></param>
         /// <param name="smooth"></param>
         /// <returns></returns>
-        public async Task<bool> BackgroundSetColorTemperature(int temperature, int? smooth)
+        public Task<bool> BackgroundSetColorTemperature(int temperature, int? smooth)
         {
-            return await Process((Device device) =>
+            return Process((Device device) =>
             {
                 return device.BackgroundSetColorTemperature(temperature, smooth);
             });
@@ -110,9 +110,9 @@ namespace YeelightAPI
         /// Set the background current state as the default one
         /// </summary>
         /// <returns></returns>
-        public async Task<bool> BackgroundSetDefault()
+        public Task<bool> BackgroundSetDefault()
         {
-            return await Process((Device device) =>
+            return Process((Device device) =>
             {
                 return device.BackgroundSetDefault();
             });
@@ -125,9 +125,9 @@ namespace YeelightAPI
         /// <param name="sat"></param>
         /// <param name="smooth"></param>
         /// <returns></returns>
-        public async Task<bool> BackgroundSetHSVColor(int hue, int sat, int? smooth = null)
+        public Task<bool> BackgroundSetHSVColor(int hue, int sat, int? smooth = null)
         {
-            return await Process((Device device) =>
+            return Process((Device device) =>
             {
                 return device.BackgroundSetHSVColor(hue, sat, smooth);
             });
@@ -140,9 +140,9 @@ namespace YeelightAPI
         /// <param name="smooth"></param>
         /// <param name="mode"></param>
         /// <returns></returns>
-        public async Task<bool> BackgroundSetPower(bool state = true, int? smooth = null, PowerOnMode mode = PowerOnMode.Normal)
+        public Task<bool> BackgroundSetPower(bool state = true, int? smooth = null, PowerOnMode mode = PowerOnMode.Normal)
         {
-            return await Process((Device device) =>
+            return Process((Device device) =>
             {
                 return device.BackgroundSetPower(state, smooth, mode);
             });
@@ -156,9 +156,9 @@ namespace YeelightAPI
         /// <param name="b"></param>
         /// <param name="smooth"></param>
         /// <returns></returns>
-        public async Task<bool> BackgroundSetRGBColor(int r, int g, int b, int? smooth)
+        public Task<bool> BackgroundSetRGBColor(int r, int g, int b, int? smooth)
         {
-            return await Process((Device device) =>
+            return Process((Device device) =>
             {
                 return device.BackgroundSetRGBColor(r, g, b, smooth);
             });
@@ -169,9 +169,9 @@ namespace YeelightAPI
         /// </summary>
         /// <param name="scene"></param>
         /// <returns></returns>
-        public async Task<bool> BackgroundSetScene(Scene scene)
+        public Task<bool> BackgroundSetScene(Scene scene)
         {
-            return await Process((Device device) =>
+            return Process((Device device) =>
             {
                 return device.BackgroundSetScene(scene);
             });
@@ -182,9 +182,9 @@ namespace YeelightAPI
         /// </summary>
         /// <param name="flow"></param>
         /// <returns></returns>
-        public async Task<bool> BackgroundStartColorFlow(ColorFlow flow)
+        public Task<bool> BackgroundStartColorFlow(ColorFlow flow)
         {
-            return await Process((Device device) =>
+            return Process((Device device) =>
             {
                 return device.BackgroundStartColorFlow(flow);
             });
@@ -194,9 +194,9 @@ namespace YeelightAPI
         /// Stops the color flow
         /// </summary>
         /// <returns></returns>
-        public async Task<bool> BackgroundStopColorFlow()
+        public Task<bool> BackgroundStopColorFlow()
         {
-            return await Process((Device device) =>
+            return Process((Device device) =>
             {
                 return device.BackgroundStopColorFlow();
             });
@@ -206,9 +206,9 @@ namespace YeelightAPI
         /// Toggle background light
         /// </summary>
         /// <returns></returns>
-        public async Task<bool> BackgroundToggle()
+        public Task<bool> BackgroundToggle()
         {
-            return await Process((Device device) =>
+            return Process((Device device) =>
             {
                 return device.BackgroundToggle();
             });
@@ -219,9 +219,9 @@ namespace YeelightAPI
         /// </summary>
         /// <param name="smooth"></param>
         /// <returns></returns>
-        public async Task<bool> BackgroundTurnOff(int? smooth = null)
+        public Task<bool> BackgroundTurnOff(int? smooth = null)
         {
-            return await Process((Device device) =>
+            return Process((Device device) =>
             {
                 return device.BackgroundTurnOff(smooth);
             });
@@ -233,9 +233,9 @@ namespace YeelightAPI
         /// <param name="smooth"></param>
         /// <param name="mode"></param>
         /// <returns></returns>
-        public async Task<bool> BackgroundTurnOn(int? smooth = null, PowerOnMode mode = PowerOnMode.Normal)
+        public Task<bool> BackgroundTurnOn(int? smooth = null, PowerOnMode mode = PowerOnMode.Normal)
         {
-            return await Process((Device device) =>
+            return Process((Device device) =>
             {
                 return device.BackgroundTurnOn(smooth, mode);
             });
@@ -245,9 +245,9 @@ namespace YeelightAPI
         /// Toggle Both Background and normal light
         /// </summary>
         /// <returns></returns>
-        public async Task<bool> DevToggle()
+        public Task<bool> DevToggle()
         {
-            return await Process((Device device) =>
+            return Process((Device device) =>
             {
                 return device.DevToggle();
             });
